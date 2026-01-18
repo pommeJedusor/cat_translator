@@ -61,7 +61,15 @@ fn main() {
         // crypt
     } else {
         let mut crypted_message = args[text_starting_index..].join(" ");
-        (0..depth).for_each(|_| crypted_message = cat_translater::text_to_cat(&crypted_message));
+        for _ in 0..depth {
+            match cat_translater::text_to_cat(&crypted_message) {
+                Ok(x) => crypted_message = x,
+                Err(x) => {
+                    println!("{}", x);
+                    return;
+                }
+            }
+        }
         println!("{}", crypted_message);
     }
 }

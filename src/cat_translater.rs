@@ -52,8 +52,22 @@ fn number_to_bin(number: u8, length: usize) -> String {
 
 // translate a text to its bit representation, each character is 7 bits and their bit
 // representation is their index in the BIN_TO_CHAR array
-fn text_to_bin(text: &str) -> String {
-    text.chars()
+fn text_to_bin(text: &str) -> Result<String, String> {
+    let unvalid_characters = text
+        .chars()
+        .map(|x| (x, BIN_TO_CHAR.iter().find(|y| **y == &x.to_string())))
+        .filter(|x| x.1.is_none())
+        .map(|x| x.0)
+        .collect::<Vec<char>>();
+    if unvalid_characters.len() != 0 {
+        return Err(format!(
+            "{} is not a valid character\nhere is a list of all valid characters: \nabcdefghijklmnopqrstuvwxyz1234567890-=[];'#|,./ ABCDEFGHIJKLMNOPQRSTUVWXYZ!€£$%^&*()_+{}:@~|<>?)\"",
+            unvalid_characters[0], "{}"
+        ));
+    }
+    println!("test: {:?}", unvalid_characters);
+    Ok(text
+        .chars()
         .map(|x| {
             BIN_TO_CHAR
                 .iter()
@@ -64,7 +78,7 @@ fn text_to_bin(text: &str) -> String {
         })
         .map(|x| number_to_bin(x as u8, 7))
         .collect::<Vec<String>>()
-        .join("")
+        .join(""))
 }
 
 // translate cat noises to their bit representations, each noise is 4 bits and their bit
@@ -116,8 +130,11 @@ fn bin_to_text(bin: &str) -> String {
     result.join("")
 }
 
-pub fn text_to_cat(text: &str) -> String {
-    bin_to_cat(&text_to_bin(text))
+pub fn text_to_cat(text: &str) -> Result<String, String> {
+    match text_to_bin(text) {
+        Ok(bin) => Ok(bin_to_cat(&bin)),
+        Err(e) => Err(e),
+    }
 }
 
 pub fn cat_noises_to_text(cat_noises: &str) -> String {
