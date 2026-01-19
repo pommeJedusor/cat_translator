@@ -1,5 +1,5 @@
 use std::env;
-pub mod cat_translater;
+pub mod cat_translator;
 
 const CAT_TO_TEXT_SUB_COMMAND_NAME: &str = "decrypt";
 const TEXT_TO_CAT_SUB_COMMAND_NAME: &str = "crypt";
@@ -61,14 +61,14 @@ fn main() {
     if subcommand == CAT_TO_TEXT_SUB_COMMAND_NAME {
         let mut decrypted_message = args[text_starting_index..].join(" ");
         (0..depth).for_each(|_| {
-            decrypted_message = cat_translater::cat_noises_to_text(&decrypted_message)
+            decrypted_message = cat_translator::cat_noises_to_text(&decrypted_message)
         });
         println!("{}", decrypted_message);
         // crypt
     } else {
         let mut crypted_message = args[text_starting_index..].join(" ");
         for _ in 0..depth {
-            match cat_translater::text_to_cat(&crypted_message) {
+            match cat_translator::text_to_cat(&crypted_message) {
                 Ok(x) => crypted_message = x,
                 Err(x) => {
                     println!("{}", x);

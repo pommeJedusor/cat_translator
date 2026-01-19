@@ -1,5 +1,5 @@
 [package]
-name = "cat_translater"
+name = "cat_translator"
 version = "0.1.0"
 edition = "2024"
 repository = "https://github.com/pommeJedusor/cat_translator"
