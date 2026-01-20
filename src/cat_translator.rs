@@ -9,8 +9,8 @@ const BIN_TO_CHAR: [&str; 128] = [
 ];
 
 const BIN_TO_CAT: [&str; 16] = [
-    "meow", "meoww", "meowww", "meowwww", "mrow", "mroww", "mrowww", "mrowwww", "mrrp", "mrrrp",
-    "mrrrrp", "mrrrrrp", "purr", "purrr", "purrrr", "purrrrr",
+    "meow", "meoww", "meowww", "meowwww", "mrow", "mroww", "mrowww", "mrowwww", "mrp", "mrrp",
+    "mrrrp", "mrrrrp", "purr", "purrr", "purrrr", "purrrrr",
 ];
 
 fn cat_noise_to_bin(cat_noise: &str) -> usize {
@@ -30,10 +30,10 @@ fn cat_noise_to_bin(cat_noise: &str) -> usize {
         // if mrrp
     } else if cat_noise.get(0..1).unwrap() == "m" && !cat_noise.contains("o") {
         // length min bound to 4
-        let len = usize::max(cat_noise.len(), 4);
+        let len = usize::max(cat_noise.len(), 3);
         // length max bound to 7
-        let len = usize::min(len, 7);
-        return 8 | (len - 4);
+        let len = usize::min(len, 6);
+        return 8 | (len - 3);
         // if mrow
     } else {
         // length min bound to 4
