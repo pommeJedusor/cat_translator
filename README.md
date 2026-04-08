@@ -1,5 +1,13 @@
 # CAT TRANSLATOR
 
+## how to install
+
+```bash
+cargo install cat_translator
+```
+
+[see crates.io package](https://crates.io/crates/cat_translator)
+
 ## how to use
 
 to get a list of commands and their description:
