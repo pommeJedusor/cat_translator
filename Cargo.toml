@@ -2,7 +2,11 @@
 name = "cat_translator"
 version = "0.1.0"
 edition = "2024"
+description = "encodes text into cat noises code and vice-versa"
 repository = "https://github.com/pommeJedusor/cat_translator"
 license-file = "LICENSE"
+keywords = ["cli"]
+categories = ["command-line-utilities"]
+readme = "README.md"
 
 [dependencies]
