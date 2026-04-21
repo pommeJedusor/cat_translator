@@ -135,6 +135,7 @@ mod tests {
     use super::*;
     const INPUT_TEXT_TEST: &str = "the incredible cat encoding system was created by Freya (thenonymous), this rust client and its implementation of it is made by pomme jkqvxz1234567890-=[];'#|./ABCDEGHIJKLMNOPQRSTUVWXYZ!€£$%^&*_+{}:@~|<>?\"";
     const INPUT_CAT_NOISES_TEST: &str = "meowww mrowww meoww purr meowww meowww purrrrr meoww meow meowwww mrow meoww meoww meoww meow mrp meow purr mrow meow meoww meoww mrowww meoww meoww mrowwww mrp meowww meow meow mrow purrr mrowwww mrp mrow meoww mrrrp meow mrp mrowwww meow meowwww meoww meow meowwww mrow meowwww meowww purrrrr meowww mrow mrowww meow mrrp meoww meowwww meow mrp meowwww meoww mrowwww mrrp mrowww meow meow mrow mrrp mrowwww mrp meowww meowww meowww meoww meow meow meoww meowwww meow mrp meow purrr mrowwww mrp meoww meowwww meow mrrrrp purrrr meowww mrrp meoww meow mrp mrowww meow meow meowww purrrrr purr mrow mrow purr meowwww mrp mrow meoww mrrrp meowwww mrp mrowww mrrp mrp meoww mrp meowwww mrp mrrrp meoww meowww purr mrowww mrrrrp meoww mrowwww mrrp meowwww meow purrrr meowww meow mrrp meowww purrrrr meowww meowww mroww meow mrrp meoww meowwww mroww purrrr meow mrp mroww mrp mrp meow mrp meowwww mrow mrrp mrrrp purrrrr meow meow meowwww mrow meoww mrrrp purrrrr meoww meow mrow purr mrrp meowww purrrrr meoww meow meowwww meow mrowwww mrp mrrrrp meow mrp meowwww meow meowww meow purrr meowww mrowww meow meow mrrp mrp mrp meoww purr meowwww mroww mrowwww mrp purrrr meow mrrrp mrrrrp purr mrow meoww meowwww mroww purrrr meowww meow mrrp meowww purrrrr meoww mrp meow meow meoww mrp mrow mroww purrrr meow mrow purr meowww purrrrr meoww purrrr meowwww mrp mrowww meow purr meow mrp mrrrrp purr mrow mrp mrrrp meowww meow mroww mrow mrrrrp mrrp mrrp meowwww mrow mrowww purr purrrr meoww purrr meowwww purr mrowwww purrr meow meowww meoww mrow mrow mrp purrr meowww meowww mroww mrow purr mrrp purrr mrow meowww mrrp mroww mrow mrrrp purrr mrowww mrrrp purrrr mrp meoww meow mrowww meoww mrow meowwww mrp mrrp meoww mrrrp meowwww purr mrp mrrp meowwww meowww mrrrp mroww purr purr mrrp mrrrrp meowwww mrrrp mrowwww purrr meow mrrrp meowwww mrow mrrrp mrrp purrr mrow mrrrp mrrrrp mroww mrrrp mrrrrp purrr mrp mrrrrp meowwww mrowww mrrrp purrr purrr purr mrrrrp mrrrrp mrowwww mrrrp purrrrr purrrr meow purr meowwww mrrp meowwww meowww purrrr mrowww purr purrrrr mrrrp meowwww mrow purrrr mrrrp mroww mrowwww mrrrrp meowwww mrowww purrrr purrrr purrrr :3 :3 :3";
+    const INPUT_BIN_TEST: &str = "0010011000011100001000101111000100000011010000010001000100001000000011000100000000010001011000010001011110000010000000000100110101111000010000011010000010000111000000110001000000110100001100101111001001000110000010010001001100001000001100010111100101100000000001001001011110000010001000100001000000000001001100001000000011010111100000010011000010111110001010010001000010000110000000000010111111000100010011000011100001000001101000111000011010011000000110000011100010100001001011000110101100010111100100110000111000100000100100101111001000100101000010010001001101011110000010000101100010000000100000110100100110101111000000000011010000011010111100010000010011001001001011110001000000110000011110001011000010000011000000100000110100100110000000001001100010000001110000110101011110001110000010101011110001000001001101011110001000001001001011110001100000000000000110000100010111100000010011000010111100011110001110000110000011000000100010111100010010001010001000000101010010111001100100110100011011001110000111010011110001111101000000100001010001001000110100100010010101001100100111010100001010010101010010101101011010101110100000010000011000010100001110001001000110100011110010001001001100101010010111001100100110110011101001111101000010100011010010101001110101001010101101011010101111011000101100110110101011011101110010111011011110101111111000001100001110010011001011100110110011111010001101001110101001010111101100110110111011101110000";
 
     #[test]
     fn cat_to_text_test() {
@@ -144,5 +145,25 @@ mod tests {
     #[test]
     fn text_to_cat_test() {
         assert_eq!(&text_to_cat(INPUT_TEXT_TEST).unwrap(), INPUT_CAT_NOISES_TEST);
+    }
+
+    #[test]
+    fn bin_to_text_test() {
+        assert_eq!(&bin_to_text(INPUT_BIN_TEST), INPUT_TEXT_TEST);
+    }
+
+    #[test]
+    fn bin_to_cat_test() {
+        assert_eq!(&bin_to_cat_noises(INPUT_BIN_TEST), INPUT_CAT_NOISES_TEST);
+    }
+
+    #[test]
+    fn text_to_bin_test() {
+        assert_eq!(&text_to_bin(&INPUT_TEXT_TEST).unwrap(), INPUT_BIN_TEST);
+    }
+
+    #[test]
+    fn cat_to_bin_test() {
+        assert_eq!(&cat_noises_to_bin(&INPUT_CAT_NOISES_TEST), INPUT_BIN_TEST);
     }
 }
