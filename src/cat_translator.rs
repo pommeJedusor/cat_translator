@@ -139,3 +139,21 @@ pub fn text_to_cat(text: &str) -> Result<String, String> {
 pub fn cat_noises_to_text(cat_noises: &str) -> String {
     bin_to_text(&cat_to_bin(cat_noises))
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    const INPUT_TEXT_TEST: &str = "the incredible cat encoding system was created by Freya (thenonymous), this rust client and its implementation of it is made by pomme";
+    const INPUT_CAT_NOISES_TEST: &str = "meowww mrowww meoww purr meowww meowww purrrrr meoww meow meowwww mrow meoww meoww meoww meow mrp meow purr mrow meow meoww meoww mrowww meoww meoww mrowwww mrp meowww meow meow mrow purrr mrowwww mrp mrow meoww mrrrp meow mrp mrowwww meow meowwww meoww meow meowwww mrow meowwww meowww purrrrr meowww mrow mrowww meow mrrp meoww meowwww meow mrp meowwww meoww mrowwww mrrp mrowww meow meow mrow mrrp mrowwww mrp meowww meowww meowww meoww meow meow meoww meowwww meow mrp meow purrr mrowwww mrp meoww meowwww meow mrrrrp purrrr meowww mrrp meoww meow mrp mrowww meow meow meowww purrrrr purr mrow mrow purr meowwww mrp mrow meoww mrrrp meowwww mrp mrowww mrrp mrp meoww mrp meowwww mrp mrrrp meoww meowww purr mrowww mrrrrp meoww mrowwww mrrp meowwww meow purrrr meowww meow mrrp meowww purrrrr meowww meowww mroww meow mrrp meoww meowwww mroww purrrr meow mrp mroww mrp mrp meow mrp meowwww mrow mrrp mrrrp purrrrr meow meow meowwww mrow meoww mrrrp purrrrr meoww meow mrow purr mrrp meowww purrrrr meoww meow meowwww meow mrowwww mrp mrrrrp meow mrp meowwww meow meowww meow purrr meowww mrowww meow meow mrrp mrp mrp meoww purr meowwww mroww mrowwww mrp purrrr meow mrrrp mrrrrp purr mrow meoww meowwww mroww purrrr meowww meow mrrp meowww purrrrr meoww mrp meow meow meoww mrp mrow mroww purrrr meow mrow purr meowww purrrrr meoww purrrr meowwww mrp mrowww meow purr meow :3c :3 :3";
+
+    #[test]
+    fn cat_to_text_test() {
+        assert_eq!(cat_noises_to_text(INPUT_CAT_NOISES_TEST), INPUT_TEXT_TEST);
+    }
+
+    #[test]
+    fn text_to_cat_test() {
+        assert_eq!(&text_to_cat(INPUT_TEXT_TEST).unwrap(), INPUT_CAT_NOISES_TEST);
+    }
+}
