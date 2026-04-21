@@ -60,21 +60,22 @@ fn cat_noises_to_bin(text: &str) -> String {
 }
 
 fn bin_to_cat_noises(bin: &str) -> String {
-    let mut result = vec![];
-    for i in (0..bin.len()).filter(|x| x % 4 == 0 || bin.len() - x <= bin.len() % 4) {
-        if bin.len() - i <= bin.len() % 4 {
-            result.push(if bin.get(i..=i).unwrap() == "0" {
-                ":3"
-            } else {
-                ":3c"
-            })
-        } else {
-            let cat_bin = bin.get(i..i + 4).unwrap();
-            let cat_noise = BIN_TO_CAT[usize::from_str_radix(cat_bin, 2).expect("")];
-            result.push(cat_noise);
-        }
-    }
-    result.join(" ")
+    let offset_bits_index = bin.len() - (bin.len() % 4);
+
+    let main_cat_noises = (0..offset_bits_index)
+        .step_by(4)
+        .map(|i| bin.get(i..i + 4).unwrap())
+        .map(|cat_bin| BIN_TO_CAT[usize::from_str_radix(cat_bin, 2).unwrap()]);
+    let offset_cat_noises = (offset_bits_index..bin.len())
+        .map(|i| bin.get(i..=i).unwrap())
+        .map(|cat_bin| match cat_bin {
+            "0" => ":3",
+            "1" => ":3c",
+            _ => unreachable!(),
+        });
+    let cat_noises = main_cat_noises.chain(offset_cat_noises);
+
+    cat_noises.collect::<Vec<&str>>().join(" ")
 }
 
 // translate a text to its bit representation, each character is 7 bits and their bit
@@ -82,16 +83,16 @@ fn bin_to_cat_noises(bin: &str) -> String {
 fn text_to_bin(text: &str) -> Result<String, String> {
     let unvalid_characters = text
         .chars()
-        .map(|x| (x, BIN_TO_CHAR.iter().find(|y| **y == &x.to_string())))
-        .filter(|x| x.1.is_none())
-        .map(|x| x.0)
+        .filter(|x| BIN_TO_CHAR.iter().find(|y| **y == &x.to_string()).is_none())
         .collect::<Vec<char>>();
+
     if unvalid_characters.len() != 0 {
         return Err(format!(
             "{} is not a valid character\nhere is a list of all valid characters: \nabcdefghijklmnopqrstuvwxyz1234567890-=[];'#|,./ ABCDEFGHIJKLMNOPQRSTUVWXYZ!€£$%^&*()_+{}:@~|<>?)\"",
             unvalid_characters[0], "{}"
         ));
     }
+
     Ok(text
         .chars()
         .map(|x| {
@@ -108,16 +109,13 @@ fn text_to_bin(text: &str) -> Result<String, String> {
 }
 
 fn bin_to_text(bin: &str) -> String {
-    let mut result = vec![];
-    for i in (0..bin.len())
-        .filter(|x| x % 7 == 0)
-        .filter(|x| bin.len() >= x + 7)
-    {
-        let letter_bin = bin.get(i..i + 7).unwrap();
-        let letter = BIN_TO_CHAR[usize::from_str_radix(letter_bin, 2).expect("")];
-        result.push(letter);
-    }
-    result.join("")
+    (0..bin.len())
+        .step_by(7)
+        .filter(|x| bin.len() >= x + 7) // in case the number of bit is not a multiple of 7
+        .map(|i| bin.get(i..i + 7).unwrap())
+        .map(|letter_bin| BIN_TO_CHAR[usize::from_str_radix(letter_bin, 2).unwrap()])
+        .collect::<Vec<&str>>()
+        .join("")
 }
 
 pub fn text_to_cat(text: &str) -> Result<String, String> {
