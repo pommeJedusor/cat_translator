@@ -13,41 +13,68 @@ const BIN_TO_CAT: [&str; 16] = [
     "mrrrp", "mrrrrp", "purr", "purrr", "purrrr", "purrrrr",
 ];
 
-fn cat_noise_to_bin(cat_noise: &str) -> usize {
-    if cat_noise.get(0..1).unwrap() == "p" {
-        // length min bound to 4
-        let len = usize::max(cat_noise.len(), 4);
-        // length max bound to 7
-        let len = usize::min(len, 7);
-        return 12 | (len - 4);
-        // if meow
-    } else if cat_noise.get(0..1).unwrap() == "m" && cat_noise.contains("e") {
-        // length min bound to 4
-        let len = usize::max(cat_noise.len(), 4);
-        // length max bound to 7
-        let len = usize::min(len, 7);
-        return len - 4;
-        // if mrrp
-    } else if cat_noise.get(0..1).unwrap() == "m" && !cat_noise.contains("o") {
-        // length min bound to 4
-        let len = usize::max(cat_noise.len(), 3);
-        // length max bound to 7
-        let len = usize::min(len, 6);
-        return 8 | (len - 3);
-        // if mrow
-    } else {
-        // length min bound to 4
-        let len = usize::max(cat_noise.len(), 4);
-        // length max bound to 7
-        let len = usize::min(len, 7);
-        return 4 | (len - 4);
-    }
-}
-
 // translate a {length} bit number to its String binary representation with a length of {length} bits
 fn number_to_bin(number: u8, length: usize) -> String {
     let result = format!("{number:b}");
     "0".repeat(length - result.len()) + &result
+}
+
+fn cat_noise_to_bin(cat_noise: &str) -> usize {
+    assert_ne!(cat_noise.len(), 0);
+
+    let first_letter = cat_noise.get(0..1).unwrap();
+    let is_purr = first_letter == "p";
+    let is_meow = first_letter == "m" && cat_noise.contains("e");
+    let is_mrp = first_letter == "m" && !cat_noise.contains("o");
+    let is_mrow = !(is_purr || is_meow || is_mrp);
+
+    let default_cat_noise_length = if is_mrp {3} else {4};
+
+    // length value min bound to default_size and max to default size + 3
+    let len = usize::max(cat_noise.len(), default_cat_noise_length);
+    let len = usize::min(len, default_cat_noise_length + 3);
+
+    if is_purr {
+        return 12 | (len - 4);
+    } else if is_mrp {
+        return 8 | (len - 3);
+    } else if is_mrow {
+        return 4 | (len - 4);
+    } else if is_meow {
+        return len - 4;
+    } 
+
+    unreachable!()
+}
+
+// translate cat noises to their bit representations, each noise is 4 bits and their bit
+// representation is their index in the BIN_TO_CAT array
+fn cat_noises_to_bin(text: &str) -> String {
+    text.split(" ")
+        .map(|x| match x == ":3" || x == ":3c" {
+            true => number_to_bin(if x == ":3" { 0 } else { 1 }, 1),
+            false => number_to_bin(cat_noise_to_bin(x) as u8, 4)
+        })
+        .collect::<Vec<String>>()
+        .join("")
+}
+
+fn bin_to_cat_noises(bin: &str) -> String {
+    let mut result = vec![];
+    for i in (0..bin.len()).filter(|x| x % 4 == 0 || bin.len() - x <= bin.len() % 4) {
+        if bin.len() - i <= bin.len() % 4 {
+            result.push(if bin.get(i..=i).unwrap() == "0" {
+                ":3"
+            } else {
+                ":3c"
+            })
+        } else {
+            let cat_bin = bin.get(i..i + 4).unwrap();
+            let cat_noise = BIN_TO_CAT[usize::from_str_radix(cat_bin, 2).expect("")];
+            result.push(cat_noise);
+        }
+    }
+    result.join(" ")
 }
 
 // translate a text to its bit representation, each character is 7 bits and their bit
@@ -80,42 +107,6 @@ fn text_to_bin(text: &str) -> Result<String, String> {
         .join(""))
 }
 
-// translate cat noises to their bit representations, each noise is 4 bits and their bit
-// representation is their index in the BIN_TO_CAT array
-fn cat_to_bin(text: &str) -> String {
-    text.split(" ")
-        .filter(|x| x != &":3" && x != &":3c")
-        .map(|x| cat_noise_to_bin(x))
-        .map(|x| number_to_bin(x as u8, 4))
-        .collect::<Vec<String>>()
-        .join("")
-        + &text
-            .split(" ")
-            .filter(|x| x == &":3" || x == &":3c")
-            .map(|x| if x == ":3" { 0 } else { 1 })
-            .map(|x| number_to_bin(x, 1))
-            .collect::<Vec<String>>()
-            .join("")
-}
-
-fn bin_to_cat(bin: &str) -> String {
-    let mut result = vec![];
-    for i in (0..bin.len()).filter(|x| x % 4 == 0 || bin.len() - x <= bin.len() % 4) {
-        if bin.len() - i <= bin.len() % 4 {
-            result.push(if bin.get(i..=i).unwrap() == "0" {
-                ":3"
-            } else {
-                ":3c"
-            })
-        } else {
-            let cat_bin = bin.get(i..i + 4).unwrap();
-            let cat_noise = BIN_TO_CAT[usize::from_str_radix(cat_bin, 2).expect("")];
-            result.push(cat_noise);
-        }
-    }
-    result.join(" ")
-}
-
 fn bin_to_text(bin: &str) -> String {
     let mut result = vec![];
     for i in (0..bin.len())
@@ -131,13 +122,13 @@ fn bin_to_text(bin: &str) -> String {
 
 pub fn text_to_cat(text: &str) -> Result<String, String> {
     match text_to_bin(text) {
-        Ok(bin) => Ok(bin_to_cat(&bin)),
+        Ok(bin) => Ok(bin_to_cat_noises(&bin)),
         Err(e) => Err(e),
     }
 }
 
 pub fn cat_noises_to_text(cat_noises: &str) -> String {
-    bin_to_text(&cat_to_bin(cat_noises))
+    bin_to_text(&cat_noises_to_bin(cat_noises))
 }
 
 
