@@ -49,7 +49,7 @@ fn cat_noise_to_bin(cat_noise: &str) -> usize {
 
 // translate cat noises to their bit representations, each noise is 4 bits and their bit
 // representation is their index in the BIN_TO_CAT array
-fn cat_noises_to_bin(text: &str) -> String {
+pub fn cat_noises_to_bin(text: &str) -> String {
     text.split(" ")
         .map(|x| match x == ":3" || x == ":3c" {
             true => number_to_bin(if x == ":3" { 0 } else { 1 }, 1),
@@ -59,7 +59,7 @@ fn cat_noises_to_bin(text: &str) -> String {
         .join("")
 }
 
-fn bin_to_cat_noises(bin: &str) -> String {
+pub fn bin_to_cat_noises(bin: &str) -> String {
     let offset_bits_index = bin.len() - (bin.len() % 4);
 
     let main_cat_noises = (0..offset_bits_index)
@@ -80,7 +80,7 @@ fn bin_to_cat_noises(bin: &str) -> String {
 
 // translate a text to its bit representation, each character is 7 bits and their bit
 // representation is their index in the BIN_TO_CHAR array
-fn text_to_bin(text: &str) -> Result<String, String> {
+pub fn text_to_bin(text: &str) -> Result<String, String> {
     let unvalid_characters = text
         .chars()
         .filter(|x| BIN_TO_CHAR.iter().find(|y| **y == &x.to_string()).is_none())
@@ -108,7 +108,7 @@ fn text_to_bin(text: &str) -> Result<String, String> {
         .join(""))
 }
 
-fn bin_to_text(bin: &str) -> String {
+pub fn bin_to_text(bin: &str) -> String {
     (0..bin.len())
         .step_by(7)
         .filter(|x| bin.len() >= x + 7) // in case the number of bit is not a multiple of 7

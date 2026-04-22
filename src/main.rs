@@ -1,81 +1,86 @@
-use std::env;
+use clap::{Parser, Subcommand};
+
+use crate::cat_translator::{bin_to_cat_noises, bin_to_text, cat_noises_to_bin, text_to_bin};
+
 pub mod cat_translator;
 
-const CAT_TO_TEXT_SUB_COMMAND_NAME: &str = "decrypt";
-const TEXT_TO_CAT_SUB_COMMAND_NAME: &str = "crypt";
 
-fn show_help(program_name: &str) {
-    println!(
-        "some basic command examples:\n{} {} meoww meow mrow purrr mrowwww mrrrp mrowww meoww purr mrow mrow mroww meoww meowww mrrrrrp :3 :3c :3\n{} {} it works!\n\nalternatively to crypt or decrypt multiple times you can use the -d flag putting the depth afterward (if you want to crypt it two times -d 2)\n{} {} -d 2\n\nyou can use the --help or -h to get this message",
-        program_name,
-        CAT_TO_TEXT_SUB_COMMAND_NAME,
-        program_name,
-        TEXT_TO_CAT_SUB_COMMAND_NAME,
-        program_name,
-        TEXT_TO_CAT_SUB_COMMAND_NAME
-    );
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+#[derive(Debug)]
+enum Commands {
+    /// turns text into cat noises
+    Crypt {
+        /// text to turn into cat_noises
+        text: String,
+
+        /// number of time you want it to be crypted
+        #[arg(short, long, default_value_t = 1)]
+        depth: u8,
+
+        /// interprets the input text as binary
+        #[arg(short, long)]
+        from_bin: bool,
+
+        /// turns the text into binary instead of cat noises
+        #[arg(short, long)]
+        to_bin: bool,
+    },
+
+    /// turns cat noises into text
+    Decrypt {
+        /// cat_noises to turn into text
+        cat_noises: String,
+
+        /// number of time you want it to be decrypted
+        #[arg(short, long, default_value_t = 1)]
+        depth: u8,
+
+        /// interprets the input text as binary
+        #[arg(short, long)]
+        from_bin: bool,
+
+        /// turns the cat noises into binary instead of text
+        #[arg(short, long)]
+        to_bin: bool,
+    },
+}
+
+fn crypt(mut text: String, depth: u8, from_bin: bool, to_bin: bool) -> String{
+    for _ in 0..depth{
+        if !from_bin{
+            text = text_to_bin(&text).unwrap_or_else(|x| panic!("{x}"));
+        }
+        if !to_bin{
+            text = bin_to_cat_noises(&text);
+        }
+    }
+    text
+}
+
+fn decrypt(mut cat_noises: String, depth: u8, from_bin: bool, to_bin: bool) -> String{
+    for _ in 0..depth{
+        if !from_bin{
+            cat_noises = cat_noises_to_bin(&cat_noises);
+        }
+        if !to_bin{
+            cat_noises = bin_to_text(&cat_noises);
+        }
+    }
+    cat_noises
 }
 
 fn main() {
-    let mut depth = 1;
-    let mut text_starting_index = 2;
-
-    let args: Vec<String> = env::args().collect();
-    let program_name = &args[0];
-
-    // if not sub command in second place nor help command
-    if args.len() <= 1
-        || (&args[1] != CAT_TO_TEXT_SUB_COMMAND_NAME
-            && &args[1] != TEXT_TO_CAT_SUB_COMMAND_NAME
-            && &args[1] != "-h"
-            && &args[1] != "--help")
-    {
-        println!(
-            "the comamnd must include one of those two sub commands {}, {}\n",
-            CAT_TO_TEXT_SUB_COMMAND_NAME, TEXT_TO_CAT_SUB_COMMAND_NAME,
-        );
-        show_help(program_name);
-        return;
-    }
-
-    let subcommand = &args[1];
-
-    if subcommand == "-h" || subcommand == "--help" {
-        show_help(program_name);
-        return;
-    }
-
-    // depth flag
-    if args.len() >= 4 && &args[2] == "-d" && args[3].parse::<u16>().is_ok() {
-        depth = args[3].parse::<u16>().unwrap();
-        text_starting_index = 4;
-    }
-
-    if args.len() < text_starting_index + 1 {
-        println!("the comamnd must include something to decrypt/crypt\n");
-        show_help(program_name);
-        return;
-    }
-
-    // decrypt
-    if subcommand == CAT_TO_TEXT_SUB_COMMAND_NAME {
-        let mut decrypted_message = args[text_starting_index..].join(" ");
-        (0..depth).for_each(|_| {
-            decrypted_message = cat_translator::cat_noises_to_text(&decrypted_message)
-        });
-        println!("{}", decrypted_message);
-        // crypt
-    } else {
-        let mut crypted_message = args[text_starting_index..].join(" ");
-        for _ in 0..depth {
-            match cat_translator::text_to_cat(&crypted_message) {
-                Ok(x) => crypted_message = x,
-                Err(x) => {
-                    println!("{}", x);
-                    return;
-                }
-            }
-        }
-        println!("{}", crypted_message);
-    }
+    let args = Args::parse();
+    let result = match args.command {
+        Commands::Crypt { text, depth, from_bin, to_bin } => crypt(text, depth, from_bin, to_bin),
+        Commands::Decrypt { cat_noises, depth, from_bin, to_bin } => decrypt(cat_noises, depth, from_bin, to_bin),
+    };
+    println!("{result}");
 }
