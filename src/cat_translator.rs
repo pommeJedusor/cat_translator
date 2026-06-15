@@ -28,7 +28,7 @@ fn cat_noise_to_bin(cat_noise: &str) -> usize {
     let is_mrp = first_letter == "m" && !cat_noise.contains("o");
     let is_mrow = !(is_purr || is_meow || is_mrp);
 
-    let default_cat_noise_length = if is_mrp {3} else {4};
+    let default_cat_noise_length = if is_mrp { 3 } else { 4 };
 
     // length value min bound to default_size and max to default size + 3
     let len = usize::max(cat_noise.len(), default_cat_noise_length);
@@ -42,7 +42,7 @@ fn cat_noise_to_bin(cat_noise: &str) -> usize {
         return 4 | (len - 4);
     } else if is_meow {
         return len - 4;
-    } 
+    }
 
     unreachable!()
 }
@@ -53,7 +53,7 @@ pub fn cat_noises_to_bin(text: &str) -> String {
     text.split(" ")
         .map(|x| match x == ":3" || x == ":3c" {
             true => number_to_bin(if x == ":3" { 0 } else { 1 }, 1),
-            false => number_to_bin(cat_noise_to_bin(x) as u8, 4)
+            false => number_to_bin(cat_noise_to_bin(x) as u8, 4),
         })
         .collect::<Vec<String>>()
         .join("")
@@ -83,10 +83,10 @@ pub fn bin_to_cat_noises(bin: &str) -> String {
 pub fn text_to_bin(text: &str) -> Result<String, String> {
     let unvalid_characters = text
         .chars()
-        .filter(|x| BIN_TO_CHAR.iter().find(|y| **y == &x.to_string()).is_none())
+        .filter(|x| !BIN_TO_CHAR.iter().any(|y| *y == x.to_string()))
         .collect::<Vec<char>>();
 
-    if unvalid_characters.len() != 0 {
+    if !unvalid_characters.is_empty() {
         return Err(format!(
             "{} is not a valid character\nhere is a list of all valid characters: \nabcdefghijklmnopqrstuvwxyz1234567890-=[];'#|,./ ABCDEFGHIJKLMNOPQRSTUVWXYZ!€£$%^&*()_+{}:@~|<>?)\"",
             unvalid_characters[0], "{}"
@@ -129,7 +129,6 @@ pub fn cat_noises_to_text(cat_noises: &str) -> String {
     bin_to_text(&cat_noises_to_bin(cat_noises))
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -144,7 +143,10 @@ mod tests {
 
     #[test]
     fn text_to_cat_test() {
-        assert_eq!(&text_to_cat(INPUT_TEXT_TEST).unwrap(), INPUT_CAT_NOISES_TEST);
+        assert_eq!(
+            &text_to_cat(INPUT_TEXT_TEST).unwrap(),
+            INPUT_CAT_NOISES_TEST
+        );
     }
 
     #[test]
@@ -159,11 +161,11 @@ mod tests {
 
     #[test]
     fn text_to_bin_test() {
-        assert_eq!(&text_to_bin(&INPUT_TEXT_TEST).unwrap(), INPUT_BIN_TEST);
+        assert_eq!(&text_to_bin(INPUT_TEXT_TEST).unwrap(), INPUT_BIN_TEST);
     }
 
     #[test]
     fn cat_to_bin_test() {
-        assert_eq!(&cat_noises_to_bin(&INPUT_CAT_NOISES_TEST), INPUT_BIN_TEST);
+        assert_eq!(&cat_noises_to_bin(INPUT_CAT_NOISES_TEST), INPUT_BIN_TEST);
     }
 }
