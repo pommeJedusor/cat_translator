@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use std::{io, io::Read};
 
 use crate::cat_translator::{bin_to_cat_noises, bin_to_text, cat_noises_to_bin, text_to_bin};
 
@@ -16,7 +17,7 @@ enum Commands {
     /// turns text into cat noises
     Crypt {
         /// text to turn into cat_noises
-        text: String,
+        text: Option<String>,
 
         /// number of time you want it to be crypted
         #[arg(short, long, default_value_t = 1)]
@@ -34,7 +35,7 @@ enum Commands {
     /// turns cat noises into text
     Decrypt {
         /// cat_noises to turn into text
-        cat_noises: String,
+        cat_noises: Option<String>,
 
         /// number of time you want it to be decrypted
         #[arg(short, long, default_value_t = 1)]
@@ -48,6 +49,14 @@ enum Commands {
         #[arg(short, long)]
         to_bin: bool,
     },
+}
+
+fn get_stdin_content() -> String {
+    let mut buffer = String::new();
+    io::stdin()
+        .read_to_string(&mut buffer)
+        .expect("failed to read from stdin");
+    buffer.trim().to_string()
 }
 
 fn crypt(mut text: String, depth: u8, from_bin: bool, to_bin: bool) -> String {
@@ -82,13 +91,23 @@ fn main() {
             depth,
             from_bin,
             to_bin,
-        } => crypt(text, depth, from_bin, to_bin),
+        } => crypt(
+            text.unwrap_or_else(get_stdin_content),
+            depth,
+            from_bin,
+            to_bin,
+        ),
         Commands::Decrypt {
             cat_noises,
             depth,
             from_bin,
             to_bin,
-        } => decrypt(cat_noises, depth, from_bin, to_bin),
+        } => decrypt(
+            cat_noises.unwrap_or_else(get_stdin_content),
+            depth,
+            from_bin,
+            to_bin,
+        ),
     };
     println!("{result}");
 }
