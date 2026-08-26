@@ -1,3 +1,5 @@
+use crate::Error;
+
 const BIN_TO_CHAR: [&str; 128] = [
     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s",
     "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=",
@@ -80,17 +82,17 @@ pub fn bin_to_cat_noises(bin: &str) -> String {
 
 // translate a text to its bit representation, each character is 7 bits and their bit
 // representation is their index in the BIN_TO_CHAR array
-pub fn text_to_bin(text: &str) -> Result<String, String> {
+pub fn text_to_bin(text: &str) -> Result<String, Error> {
     let unvalid_characters = text
         .chars()
         .filter(|x| !BIN_TO_CHAR.iter().any(|y| *y == x.to_string()))
         .collect::<Vec<char>>();
 
     if !unvalid_characters.is_empty() {
-        return Err(format!(
+        return Err(Error::InvalidInput(format!(
             "{} is not a valid character\nhere is a list of all valid characters: \nabcdefghijklmnopqrstuvwxyz1234567890-=[];'#|,./ ABCDEFGHIJKLMNOPQRSTUVWXYZ!€£$%^&*()_+{}:@~|<>?)\"",
             unvalid_characters[0], "{}"
-        ));
+        )));
     }
 
     Ok(text
@@ -118,11 +120,8 @@ pub fn bin_to_text(bin: &str) -> String {
         .join("")
 }
 
-pub fn text_to_cat(text: &str) -> Result<String, String> {
-    match text_to_bin(text) {
-        Ok(bin) => Ok(bin_to_cat_noises(&bin)),
-        Err(e) => Err(e),
-    }
+pub fn text_to_cat(text: &str) -> Result<String, Error> {
+    Ok(bin_to_cat_noises(&text_to_bin(text)?))
 }
 
 pub fn cat_noises_to_text(cat_noises: &str) -> String {

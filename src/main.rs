@@ -2,8 +2,10 @@ use clap::{Parser, Subcommand};
 use std::{io, io::Read};
 
 use crate::cat_translator::{bin_to_cat_noises, bin_to_text, cat_noises_to_bin, text_to_bin};
+use crate::error::Error;
 
 pub mod cat_translator;
+pub mod error;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -51,24 +53,29 @@ enum Commands {
     },
 }
 
-fn get_stdin_content() -> String {
+fn get_stdin_content() -> Result<String, Error> {
     let mut buffer = String::new();
-    io::stdin()
-        .read_to_string(&mut buffer)
-        .expect("failed to read from stdin");
-    buffer.trim().to_string()
+    io::stdin().read_to_string(&mut buffer)?;
+    Ok(buffer.trim().to_string())
 }
 
-fn crypt(mut text: String, depth: u8, from_bin: bool, to_bin: bool) -> String {
+fn get_input(text: Option<String>) -> Result<String, Error> {
+    match text {
+        Some(text) => Ok(text),
+        None => get_stdin_content(),
+    }
+}
+
+fn crypt(mut text: String, depth: u8, from_bin: bool, to_bin: bool) -> Result<String, Error> {
     for _ in 0..depth {
         if !from_bin {
-            text = text_to_bin(&text).unwrap_or_else(|x| panic!("{x}"));
+            text = text_to_bin(&text)?;
         }
         if !to_bin {
             text = bin_to_cat_noises(&text);
         }
     }
-    text
+    Ok(text)
 }
 
 fn decrypt(mut cat_noises: String, depth: u8, from_bin: bool, to_bin: bool) -> String {
@@ -83,7 +90,7 @@ fn decrypt(mut cat_noises: String, depth: u8, from_bin: bool, to_bin: bool) -> S
     cat_noises
 }
 
-fn main() {
+fn main() -> Result<(), Error> {
     let args = Args::parse();
     let result = match args.command {
         Commands::Crypt {
@@ -91,23 +98,14 @@ fn main() {
             depth,
             from_bin,
             to_bin,
-        } => crypt(
-            text.unwrap_or_else(get_stdin_content),
-            depth,
-            from_bin,
-            to_bin,
-        ),
+        } => crypt(get_input(text)?, depth, from_bin, to_bin)?,
         Commands::Decrypt {
             cat_noises,
             depth,
             from_bin,
             to_bin,
-        } => decrypt(
-            cat_noises.unwrap_or_else(get_stdin_content),
-            depth,
-            from_bin,
-            to_bin,
-        ),
+        } => decrypt(get_input(cat_noises)?, depth, from_bin, to_bin),
     };
     println!("{result}");
+    Ok(())
 }
