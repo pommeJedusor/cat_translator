@@ -1,6 +1,6 @@
 [package]
 name = "cat_translator"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2024"
 description = "encodes text into cat noises code and vice-versa"
 repository = "https://github.com/pommeJedusor/cat_translator"
